@@ -6,15 +6,17 @@
 # python -c "import site; print(site.getsitepackages())" 
 
 
-try:
-    def mai(x):
-        print (x + '134')
+# x = {'1': {'1':'f', '3': 'ga', '4':'he'}, '2':{'d':'r'}}
 
-    # if 6 >5:
-    #     print ('rt')
-except:
-    print('error')
-finally:
-    print('final')
+# s = x['1']
 
-mai(2)
+# x['2']['lty'] = '42364'
+
+# print (x)
+
+x = {}
+x['1'] = {}
+x['1']['2'] = 'gsf'
+x['1']['3']='rrbr'
+
+print(x)

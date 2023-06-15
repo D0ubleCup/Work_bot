@@ -7,7 +7,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 
 #def start
 start_but = InlineKeyboardMarkup()
-button1 = InlineKeyboardButton('Продолжить')
+button1 = InlineKeyboardButton('Продолжить', callback_data='continue')
 start_but.add(button1)
 
 
@@ -20,5 +20,5 @@ info_start_but.add(button1, button2)
 
 #def worker_reg_info
 info_for_worker_but = InlineKeyboardMarkup()
-button1 = InlineKeyboardButton('заполнить анкету регистрации')
+button1 = InlineKeyboardButton('заполнить анкету регистрации', callback_data='worker_registration')
 info_for_worker_but.add(button1)
