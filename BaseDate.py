@@ -16,20 +16,16 @@ db.row_factory=sqlite3.Row
 # finally: 
 #     if db: db.close()
 
-
+#функция проверки зарегистрирован ли ползователь
 def check_registration(username):
     db = None
     try: 
-        db = sqlite3.connect('DataBases/workers.db')
-        sql = db.cursor()
-
-        from_worker = sql.execute(f"SELECT name FROM worker WHERE username == '{username}'") 
-        from_client = sql.execute(f"SELECT name FROM client WHERE username == '{username}'") 
-        if from_worker or from_client: 
-            return True 
-        
-        else: 
+        from_worker = sql.execute(f"SELECT name FROM worker WHERE username == '{username}'")
+        from_client = sql.execute(f"SELECT name FROM client WHERE username == '{username}'")
+        if from_worker or from_client:
             return False
+        else: 
+            return True
 
     except sqlite3.Error as e:
         if db: db.rollback() 
@@ -41,10 +37,10 @@ def check_registration(username):
 
 
 
-def load_username(date, username):                      #функция для загрузки работника в базу данных
+def load_worker(date, username):
     db = None
-    worker_information = date[username]
 
+    worker_information = date[username]
     username = worker_information['username'].replace(' ', '_')
     first_name = worker_information['first_name'].replace(' ', '_')
     last_name = worker_information['last_name'].replace(' ', '_')
@@ -57,16 +53,13 @@ def load_username(date, username):                      #функция для �
         db = sqlite3.connect('DataBases/workers.db')
         sql = db.cursor()
 
-        if sql.execute(f"SELECT name FROM worker WHERE username == '{username}'"):
-            return 'такой юзер уже существует'
-        else:
-            sql.execute(f"INSERT INTO worker (username , name , specialization, phone_number, age, rate, chat_id) VALUES('{username}', '{first_name}','{resume}','{phone}', '{age}', '{0}', '{chat_id}')")
-
+        
+        sql.execute(f"INSERT INTO worker (username , name , specialization, phone_number, age, rate, chat_id) VALUES('{username}', '{first_name}','{resume}','{phone}', '{age}', '{0}', '{chat_id}')")
+        sql.execute(f"UPDATE main_info SET workers_count = workers_count + 1")
 
     except sqlite3.Error as e:
         if db: db.rollback() 
         print (e)
-
 
     finally: 
         db.commit()

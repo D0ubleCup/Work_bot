@@ -8,9 +8,9 @@
 
 import telebot  
 from config import TOKEN 
-from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes
+from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes
 from markups import start_but, info_start_but, info_for_worker_but
-from BaseDate import load_username, check_registration,reg_client,check_role 
+from BaseDate import load_username, check_registration,reg_client,check_role,load_worker
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but
 from some_functions import phone_validator,age_validator 
 
@@ -26,11 +26,12 @@ def start(message):
 def main_info(call):
     username = call.from_user.username
     check_user = check_registration(username)
-    if check_user:
-        bot.send_message(call.message.chat.id, text=info_after_start_mes, reply_markup=info_start_but )
-
-    else:
-        bot.send_message(call.message.chat.id, text=info_after_start_mes, reply_markup=info_start_but )
+    # if check_user:
+    #     bot.send_message(call.message.chat.id, text=user_already_reg_mes)
+        
+    # else:
+    #     bot.send_message(call.message.chat.id, text=info_after_start_mes, reply_markup=info_start_but )
+    bot.send_message(call.message.chat.id, text=info_after_start_mes, reply_markup=info_start_but )
     
 
 
@@ -78,14 +79,19 @@ def worker_reg_age(message):
     bot.register_next_step_handler(mes, worker_end_reg)
 
 def worker_end_reg(message):
-    username = message.from_user.username
-    age = message.text
-    chat_id = message.chat.id
-    worker_registration_dict[username]['age'] = age
-    worker_registration_dict[username]['chat_id'] = chat_id
-    load_username(worker_registration_dict, username) #функция для записи в бд
-    del worker_registration_dict[username]
-    mes = bot.send_message(message.chat.id , text = worker_endregistration_mes)
+    age = message.text.strip()
+    if age_validator (age):
+        username = message.from_user.username
+        age = message.text
+        chat_id = message.chat.id
+        worker_registration_dict[username]['age'] = age
+        worker_registration_dict[username]['chat_id'] = chat_id
+        load_worker(worker_registration_dict, username) #функция для записи в бд
+        del worker_registration_dict[username]
+        mes = bot.send_message(message.chat.id , text = worker_endregistration_mes)
+    else:
+        mes = bot.send_message(message.chat.id , text = 'Возраст некорректен, введите корректный возраст')
+        bot.register_next_step_handler(mes, worker_end_reg)
   
 
 

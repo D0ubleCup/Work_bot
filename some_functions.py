@@ -3,4 +3,8 @@ def phone_validator(str):
 
 
 def age_validator(age):
-	return (age>10 and age<70)
+	if age.isnumeric():
+		age = int(age)
+		return (age>10 and age<70)
+	else :
+		return False
