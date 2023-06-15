@@ -12,14 +12,20 @@
 
 # print (x)
 
-x = {}
-x['1'] = {}
-x['1']['2'] = 'gsf'
-x['1']['3']='rrbr'
+# x = {}
+# x['1'] = {}
+# x['1']['2'] = 'gsf'
+# x['1']['3']='rrbr'
 
-print(x)
-def norm_mob(str):
+# print(x)
+# def norm_mob(str):
 	
-    return ((len(str)>=11) and (len(str)<=12) and (str[0]=='+') or (str[0]=='8'))
-phone='89061071451'	    
-print(norm_mob(phone))  
+#     return ((len(str)>=11) and (len(str)<=12) and (str[0]=='+') or (str[0]=='8'))
+# phone='89061071451'	    
+# print(norm_mob(phone))  
+
+import sqlite3
+db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+sql=db.cursor()
+
+sql.execute("SELECT name FROM worker WHERE username == 'Alexei0212022'")
