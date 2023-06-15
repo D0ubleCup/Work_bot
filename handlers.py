@@ -10,9 +10,8 @@ import telebot
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes
 from markups import start_but, info_start_but, info_for_worker_but
-from BaseDate import load_username, check_registration
+from BaseDate import load_username, check_registration,reg_client,check_role 
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but
-from BaseDate import reg_client 
 from some_functions import phone_validator,age_validator 
 
 client_registration_dict={}
@@ -139,9 +138,17 @@ def client_reg_phone(message):
         mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
         bot.register_next_step_handler(mes,client_reg_phone)
 
-
-
-
+@bot.message_handler(commands='commands')
+def send_commands_to_user(message):
+    username=message.from_user.username
+    if check_registration(username):
+        role=check_role(username)
+        if role=='worker':
+            bot.send_message(message.chat.id,'Вы работник')
+        if role=='client':
+            bot.send_message(message.chat.id,'Вы заказчик')  
+    else:
+        bot.send_message(message.chat.id,'Вы не зарегестрированы')
 
 
 
