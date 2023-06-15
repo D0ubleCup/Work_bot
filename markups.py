@@ -20,5 +20,12 @@ info_start_but.add(button1, button2)
 
 #def worker_reg_info
 info_for_worker_but = InlineKeyboardMarkup()
-button1 = InlineKeyboardButton('заполнить анкету регистрации', callback_data='worker_registration')
+button1 = InlineKeyboardButton('Заполнить анкету регистрации', callback_data='worker_registration')
 info_for_worker_but.add(button1)
+
+
+
+#def client_reg_info
+info_for_client_but = InlineKeyboardMarkup()
+button1 = InlineKeyboardButton('Заполнить анкету регистрации',callback_data='client_registration')
+info_for_client_but.add(button1)

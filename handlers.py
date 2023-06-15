@@ -11,19 +11,25 @@ from config import TOKEN
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes
 from markups import start_but, info_start_but, info_for_worker_but
 from BaseDate import load_username, check_registration
+from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but
+from BaseDate import reg_client 
+from some_functions import phone_validator,age_validator 
+
+client_registration_dict={}
 
 bot = telebot.TeleBot(token=TOKEN)
 
 @bot.message_handler(commands=['start'])
 def start(message): 
-    mes = bot.send_message(message.chat.id, text=start_mes , reply_markup=start_but)
+    bot.send_message(message.chat.id, text=start_mes , reply_markup=start_but)
     
 @bot.callback_query_handler(func=lambda call: call.data=='continue')
 def main_info(call):
     username = call.from_user.username
     check_user = check_registration(username)
     if check_user:
-        pass
+        bot.send_message(call.message.chat.id, text=info_after_start_mes, reply_markup=info_start_but )
+
     else:
         bot.send_message(call.message.chat.id, text=info_after_start_mes, reply_markup=info_start_but )
     
@@ -42,7 +48,7 @@ def worker_reg_name(call):
     worker_registration_dict[username] = {}
     worker_registration_dict[username]['username'] = username
     mes = bot.send_message(call.message.chat.id , 'введите ваше имя')
-    bot.register_next_step_handler(mes, worker_reg_surname)
+    bot.register_next_step_handler(mes, worker_reg_surname)  
 
 def worker_reg_surname(message):
     username = message.from_user.username
@@ -82,6 +88,59 @@ def worker_end_reg(message):
     del worker_registration_dict[username]
     mes = bot.send_message(message.chat.id , text = worker_endregistration_mes)
   
+
+
+
+#информирование и регистрация работодателя
+
+@bot.callback_query_handler(func=lambda call: call.data=='employer')
+def client_reg_info(call):
+    mes = bot.send_message(call.message.chat.id, text="Написать текст", reply_markup=info_for_client_but)
+    
+    
+
+@bot.callback_query_handler(func=lambda call: call.data=='client_registration')
+def client_reg_name(call):
+    print(1)
+    chat_id=call.message.chat.id
+    username=call.from_user.username
+    client_registration_dict[username]={
+    'username':username,
+    'chat_id':chat_id   
+    }
+    mes = bot.send_message(call.message.chat.id , 'Введите ваше имя')
+    bot.register_next_step_handler(mes, client_reg_surname)
+
+def client_reg_surname(message):
+    name=message.text
+    username=message.from_user.username
+    client_registration_dict[username]['name']=name
+    mes = bot.send_message(message.chat.id , 'Введите ваш номер телефона')
+    bot.register_next_step_handler(mes,client_reg_phone)
+
+def client_reg_phone(message):
+    
+    phone_number=message.text.strip()
+    check_phone=phone_validator(message.text)
+    if check_phone:
+        username=message.from_user.username
+        client_registration_dict[username]['phone_number']=phone_number
+        print(client_registration_dict)
+        
+        user_exist=reg_client(client_registration_dict,username)
+        if not user_exist:
+            bot.send_message(message.chat.id,'Вы зарегестрировались')
+            
+        else:
+            bot.send_message(message.chat.id,'Вы уже зарегестрированы в системе. Нажмите /commands, чтобы увидеть ваши возможности ')
+        del client_registration_dict[username]
+        
+    else:
+        mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
+        bot.register_next_step_handler(mes,client_reg_phone)
+
+
+
 
 
 
