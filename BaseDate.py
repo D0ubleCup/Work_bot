@@ -23,9 +23,9 @@ def check_registration(username):
         from_worker = sql.execute(f"SELECT name FROM worker WHERE username == '{username}'")
         from_client = sql.execute(f"SELECT name FROM client WHERE username == '{username}'")
         if from_worker or from_client:
-            return False
-        else: 
             return True
+        else: 
+            return False
 
     except sqlite3.Error as e:
         if db: db.rollback() 
@@ -87,3 +87,4 @@ def reg_client(client_info,username):
  
     finally:  
         if db: db.close()
+
