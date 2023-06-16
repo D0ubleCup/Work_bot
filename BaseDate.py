@@ -5,14 +5,9 @@ db.row_factory=sqlite3.Row
 # вставлять везде этот обработчик ошибок
 # db = None
 # try: 
-#     db = sqlite3.connect('DataBases/workers.db')
-#     sql = db.cursor()
-
 # except sqlite3.Error as e:
 #     if db: db.rollback() 
 #     print (e)
-
-
 # finally: 
 #     if db: db.close()
 
@@ -26,24 +21,25 @@ def check_registration(username):
             return True
         else: 
             return False
-
     except sqlite3.Error as e:
         if db: db.rollback() 
         print (e)
-
-
     finally: 
         if db: db.close()
+#функция проверки роли пользователя
+def check_role(username):
+    sql.execute(f"SELECT 'worker' as source, username FROM worker WHERE username='{username}' UNION ALL SELECT 'client' as source, username FROM client WHERE username='{username}'")
+    rows = sql.fetchone()
+    return rows[0]
 
 
-
-def load_worker(date, username):
+#запись работника в бд
+def reg_worker(date, username):
     db = None
 
     worker_information = date[username]
     username = worker_information['username'].replace(' ', '_')
     first_name = worker_information['first_name'].replace(' ', '_')
-    last_name = worker_information['last_name'].replace(' ', '_')
     resume = worker_information['resume'].replace(' ', '_')
     phone = worker_information['phone'].replace(' ', '_')
     age = worker_information['age']
@@ -76,20 +72,24 @@ def reg_client(client_info,username):               #функция записи
         else: #если такой записи нет  
             sql.execute(f"INSERT INTO client(name,phone_number,chat_id,username) VALUES('{name}','{phone_number}','{chat_id}','{username}')")
             sql.execute(f"UPDATE main_info SET client_count = client_count + 1")
-            
             return False
     except sqlite3.Error as e: 
         if db: db.rollback()  
         print (e) 
- 
- 
     finally:  
         db.commit()
         if db: db.close()
 
-
-
-def check_role(username):
-    sql.execute(f"SELECT 'worker' as source, username FROM worker WHERE username='{username}' UNION ALL SELECT 'client' as source, username FROM client WHERE username='{username}'")
-    rows = sql.fetchone()
-    return rows[0]
+#изменение имени
+def worker_change_name_bd(username, new_username):
+    db = None
+    try: 
+        sql.execute(f"UPDATE worker SET name = '{new_username}' WHERE username = '{username}'")
+        return f'Успешно, ваш имя измененно на {new_username}'
+    except sqlite3.Error as e:
+        if db: db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        if db: db.close()
+    
