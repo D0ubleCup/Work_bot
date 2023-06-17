@@ -10,7 +10,7 @@ import telebot
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes, client_endregistration_mes, info_for_client_mes, you_client_comands_mes, you_worker_comands_mes
 from markups import start_but, info_start_but, info_for_worker_but
-from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd
+from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but
 from some_functions import phone_validator,age_validator 
 
@@ -159,19 +159,62 @@ def worker_profile (message):
         bot.send_message(message.chat.id, text = 'функция', reply_markup=worker_profile_but)
 
 
+
 #изменение имени у работника
 @bot.callback_query_handler(func=lambda call: call.data=='worker_change_name')
 def worker_change_name(call):
-    mes = bot.send_message(call.message.chat.id, 'введите новое имя пользователя')
+    mes = bot.send_message(call.message.chat.id, 'Введите новое имя пользователя')
     bot.register_next_step_handler(mes, worker_change_name2)
 def worker_change_name2(message):
     username = message.from_user.username
     new_username = message.text
     answer_bd = worker_change_name_bd(username, new_username)
-    mes = bot.send_message(message.chat.id , text = answer_bd)
-    bot.register_next_step_handler(mes, worker_profile)
+    bot.send_message(message.chat.id , text = answer_bd, reply_markup=worker_but)
 
+#изменение описания у работника 
+@bot.callback_query_handler(func=lambda call: call.data=='worker_change_description')
+def worker_change_description(call):
+    mes = bot.send_message(call.message.chat.id, 'Введите новое описание')
+    bot.register_next_step_handler(mes, worker_change_description2)
+def worker_change_description2(message):
+    username = message.from_user.username
+    new_description = message.text
+    answer_bd = worker_change_description_bd(username, new_description)
+    bot.send_message(message.chat.id , text = answer_bd, reply_markup= worker_but)
     
+#изменение номера телефона у работника 
+@bot.callback_query_handler(func=lambda call: call.data=='worker_change_phone')
+def worker_change_phone(call):
+    mes = bot.send_message(call.message.chat.id, 'Введите новый телефонный номер')
+    bot.register_next_step_handler(mes, worker_change_phone2)
+def worker_change_phone2(message):
+    username = message.from_user.username
+    new_phone_namber = message.text
+    check_phone=phone_validator(new_phone_namber)
+    if check_phone:
+        answer_bd = worker_change_phone_bd(username, new_phone_namber)
+        bot.send_message(message.chat.id , text = answer_bd, reply_markup=worker_but)
+    else:
+        mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
+        bot.register_next_step_handler(mes,worker_change_phone2)
+        
+#изменение возраста у работника 
+@bot.callback_query_handler(func=lambda call: call.data=='worker_change_age')
+def worker_change_age(call):
+    mes = bot.send_message(call.message.chat.id, 'Введите другой возраст')
+    bot.register_next_step_handler(mes, worker_change_age2)
+def worker_change_age2(message):
+    username = message.from_user.username
+    new_age = message.text
+    check_age = age_validator (new_age)
+    if check_age:
+        answer_bd = worker_change_age_bd(username, new_age)
+        bot.send_message(message.chat.id , text = answer_bd,reply_markup=worker_but)
+    else:
+        mes = bot.send_message(message.chat.id , text = 'Возраст некорректен, введите корректный возраст')
+        bot.register_next_step_handler(mes, worker_change_age2)
+    
+
 
 
 

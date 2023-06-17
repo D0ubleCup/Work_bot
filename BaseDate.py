@@ -9,6 +9,7 @@ db.row_factory=sqlite3.Row
 #     if db: db.rollback() 
 #     print (e)
 # finally: 
+#     db.commit()
 #     if db: db.close()
 
 #функция проверки зарегистрирован ли ползователь
@@ -80,16 +81,62 @@ def reg_client(client_info,username):               #функция записи
         db.commit()
         if db: db.close()
 
-#изменение имени
+
+#изменение имени у работника
 def worker_change_name_bd(username, new_username):
-    db = None
     try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
         sql.execute(f"UPDATE worker SET name = '{new_username}' WHERE username = '{username}'")
-        return f'Успешно, ваш имя измененно на {new_username}'
+        return f'Успешно, ваше имя измененно на {new_username}'
     except sqlite3.Error as e:
         if db: db.rollback() 
         print (e)
         return 'Упс, что то пошло не так'
     finally: 
-        if db: db.close()
+        db.commit()
+        db.close()
+#изменение описания у работника
+def worker_change_description_bd(username, new_description):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"UPDATE worker SET specialization = '{new_description}' WHERE username = '{username}'")
+        return f'Успешно, ваше описание измененно'
+    except sqlite3.Error as e:
+        if db: db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close()
+#изменение номера телефона у работника
+def worker_change_phone_bd(username, new_phone_namber):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"UPDATE worker SET phone_number = '{new_phone_namber}' WHERE username = '{username}'")
+        return f'Успешно, ваш номер успешно изменен на {new_phone_namber}'
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close()
+#изменение возраста у работника
+def worker_change_age_bd(username, new_age):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"UPDATE worker SET age = '{new_age}' WHERE username = '{username}'")
+        return f'Успешно, ваш возраст успешно изменен на{new_age}'
+    except sqlite3.Error as e:
+        if db: db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close()
+
     
