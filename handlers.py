@@ -10,7 +10,7 @@ import telebot
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes
 from markups import start_but, info_start_but, info_for_worker_but
-from BaseDate import load_username, check_registration,reg_client,check_role,load_worker
+from BaseDate import  check_registration,reg_client,check_role,load_worker
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but
 from some_functions import phone_validator,age_validator 
 
