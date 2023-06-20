@@ -147,17 +147,16 @@ def send_commands_to_user(message):
 
 #возможно логику пересылку на именно этот хендлеры нужно заменить
 #логика профиля и его коректировки
+@bot.callback_query_handler(func=lambda call: call.data=='change_profile')
 @bot.message_handler(content_types='text')
 def worker_profile (message):
     username = message.chat.id
     if message.text == 'Мой профиль':
-        # bot.send_message(message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
-        bot.send_message(message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
-        # role = check_role(username)
-        # if role == 'worker':
-        #     bot.send_message(message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
-        # elif role == 'client':
-        #     bot.send_message(message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
+        role = check_role(username)
+        if role == 'worker':
+            bot.send_message(message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
+        elif role == 'client':
+            bot.send_message(message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
 
 
 
