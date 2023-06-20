@@ -147,6 +147,7 @@ def send_commands_to_user(message):
 
 #возможно логику пересылку на именно этот хендлеры нужно заменить
 #логика профиля и его коректировки
+@bot.callback_query_handler(func=lambda call: call.data=='change_profile')
 @bot.message_handler(content_types='text')
 def worker_profile (message):
     username = message.chat.id
