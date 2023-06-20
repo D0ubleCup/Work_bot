@@ -182,3 +182,44 @@ def client_change_phone_bd(username, new_phone_namber):
         print('phone')
         db.commit()
         db.close()
+
+
+#Добавление записи в таблицу черновая работа 
+
+def add_work_black(work_dict,username):               #функция записи заказчика в базу данных, принимает словарь и имя пользователя
+    # username=client_info[username]['username']
+    # chat_id=client_info[username]['chat_id']
+    # phone_number=client_info[username]['phone_number']
+    # name=client_info[username]['name']
+    username=username
+    type_work=title=work_dict[username]['type']
+    title=work_dict[username]['title']
+    description=work_dict[username]['description']
+    adress=work_dict[username]['adress']
+    count_workers=work_dict[username]['workers_count']
+    age=work_dict[username]['age']
+    price=work_dict[username]['price']
+    
+   
+    
+    try:
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT * FROM client WHERE username=='{username}'")
+        client=sql.fetchone()[0]
+        if type_work=='Почасовая':
+            sql.execute(f"INSERT INTO order_hour_black(client,title,description,adress,count_workers,age,price) VALUES('{client}','{title}','{description}','{adress}','{count_workers}','{age}','{price}')")
+            sql.execute(f"UPDATE main_info SET orders_count = orders_count + 1")
+            sql.execute(f"UPDATE main_info SET orders_sum = orders_sum + {price}")
+        if type_work=='Фиксированная':
+            sql.execute(f"INSERT INTO order_fix_black(client,title,description,adress,count_workers,age,price) VALUES('{client}','{title}','{description}','{adress}','{count_workers}','{age}','{price}')")
+            sql.execute(f"UPDATE main_info SET orders_count = orders_count + 1")
+            sql.execute(f"UPDATE main_info SET orders_sum = orders_sum + {price}")
+    except sqlite3.Error as e: 
+        if db: db.rollback()  
+        print (e) 
+    finally:  
+        db.commit()
+        db.close()
+
+add_work_black({'Hzorhz': {'type': 'Почасовая', 'title': 'название', 'description': 'Описание', 'adress': 'адрес', 'workers_count': 6, 'age': 12, 'price': 1789}},'Hzorhz')

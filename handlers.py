@@ -10,12 +10,12 @@ import telebot
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes, client_endregistration_mes, info_for_client_mes, you_client_comands_mes, you_worker_comands_mes
 from markups import start_but, info_start_but, info_for_worker_but,client_but
-from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd
-from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but
+from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd,add_work_black
+from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but,choose_type_button
 from some_functions import phone_validator,age_validator 
 
 client_registration_dict={}
-
+client_add_work_dict={}
 bot = telebot.TeleBot(token=TOKEN)
 
 @bot.message_handler(commands=['start'])
@@ -140,7 +140,7 @@ def send_commands_to_user(message):
         if role=='worker':
             bot.send_message(message.chat.id,text = you_worker_comands_mes, reply_markup= worker_but )
         if role=='client':
-            bot.send_message(message.chat.id,text = you_client_comands_mes  )  
+            bot.send_message(message.chat.id,text = you_client_comands_mes ,reply_markup=client_but )  
     else:
         bot.send_message(message.chat.id, text ='Вы не зарегестрированы, зарегистрируйтесь', reply_markup= start_but)
 
@@ -149,14 +149,16 @@ def send_commands_to_user(message):
 #логика профиля и его коректировки
 @bot.callback_query_handler(func=lambda call: call.data=='change_profile')
 @bot.message_handler(content_types='text')
-def worker_profile (message):
-    username = message.chat.id
-    if message.text == 'Мой профиль':
-        role = check_role(username)
-        if role == 'worker':
-            bot.send_message(message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
-        elif role == 'client':
-            bot.send_message(message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
+def worker_profile (call):
+    username = call.from_user.username
+    
+    
+    role = check_role(username)
+    
+    if role == 'worker':
+        bot.send_message(call.message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
+    elif role == 'client':
+        bot.send_message(call.message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
 
 
 
@@ -244,5 +246,74 @@ def client_change_phone2(message):
 
 
 
+#Добавление работы в черновую базу данных со стороны заказчика
+@bot.callback_query_handler(func=lambda call: call.data=='add_work')
+def choose_type_work(call):
+    client_add_work_dict[call.from_user.username]={}
+    mes=bot.send_message(call.message.chat.id,'Выберите тип оплаты за работу',reply_markup=choose_type_button)
+    bot.register_next_step_handler(mes,work_title)
+
+def work_title(message):
+    username=message.from_user.username
+    if message.text=='Почасовая':
+        client_add_work_dict[username]['type']='Почасовая'
+    if message.text=='Фиксированная':
+        client_add_work_dict[username]['type']='Фиксированная'
+    mes=bot.send_message(message.chat.id,'Введите название работы')
+    bot.register_next_step_handler(mes,work_description)
+
+def work_description(message):
+    username=message.from_user.username
+    client_add_work_dict[username]['title']=message.text
+    mes=bot.send_message(message.chat.id,'Введите подробное описание работы')
+    bot.register_next_step_handler(mes,work_adress)
+
+def work_adress(message):
+    username=message.from_user.username
+    client_add_work_dict[username]['description']=message.text
+    mes=bot.send_message(message.chat.id,'Введите адрес работы')
+    bot.register_next_step_handler(mes,work_workers_count)
+
+def work_workers_count(message):
+    username=message.from_user.username
+    client_add_work_dict[username]['adress']=message.text
+    mes=bot.send_message(message.chat.id,'Введите необходимое количество работников')
+    bot.register_next_step_handler(mes,work_age)
+
+def work_age(message):
+    if message.text.strip().isnumeric():
+        username=message.from_user.username
+        client_add_work_dict[username]['workers_count']=int(message.text.strip())
+        mes=bot.send_message(message.chat.id,'Введите желаемый возраст работников')
+        bot.register_next_step_handler(mes,work_price)
+    #     bot.register_next_step_handler(mes,work_price)
+    #     mes=bot.send_message(message.chat.id,'Введите желаемую оплату в рублях. Если она не соответсвует нормам, то с вами свяжется администратор для того, чтобы обсудить ее')
+    #     bot.register_next_step_handler(mes,work_price)
+    else:
+        mes=bot.send_message(message.chat.id,'Пожалуйста, введите число.')
+        bot.register_next_step_handler(mes,work_age)
+def work_price(message):
+    if message.text.strip().isnumeric():
+        username=message.from_user.username
+        client_add_work_dict[username]['age']=int(message.text.strip())
+        mes=bot.send_message(message.chat.id,'Введите желаемую оплату в рублях. Если она не соответсвует нормам, то с вами свяжется администратор для того, чтобы обсудить ее')
+        bot.register_next_step_handler(mes,work_finish)   
+    else:
+        mes=bot.send_message(message.chat.id,'Пожалуйста, введите число.')
+        bot.register_next_step_handler(mes,work_price)
+   
+
+def work_finish(message):
+    if message.text.strip().isnumeric():
+        username=message.from_user.username
+        client_add_work_dict[username]['price']=int(message.text.strip())
+        mes=bot.send_message(message.chat.id,'Ваша вакансия отправлена администатору. В скором времени она будет опубликована и на нее начнут откликаться работники.')
+        add_work_black(client_add_work_dict,username)
+        print(client_add_work_dict)
+    else:
+        mes=bot.send_message(message.chat.id,'Пожалуйста, введите число.')
+        bot.register_next_step_handler(mes,work_finish)
+    
+    
 
 bot.polling(none_stop=True) 
