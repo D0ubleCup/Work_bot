@@ -50,7 +50,7 @@ worker_profile_but.add(button1,button2,button3,button4)
 #def send_commands_to_user - для заказчиков
 client_but = InlineKeyboardMarkup()
 button1 = InlineKeyboardButton('Мой профиль', callback_data='change_profile')
-button2 = InlineKeyboardButton('Посмотреть заявки на работу')
+button2 = InlineKeyboardButton('Опубликовать работу',callback_data='add_work')
 client_but.add(button1, button2)
 
 #def client_profile
@@ -64,3 +64,9 @@ choise_how_to_find_work_button = InlineKeyboardMarkup()
 button1 = InlineKeyboardButton('Фильтровать', callback_data='filter_find_work')
 button2 = InlineKeyboardButton('Показать все заявки', callback_data='all_vacancy_find_work')
 choise_how_to_find_work_button.add(button1, button2)
+
+#def choose_type_work
+choose_type_button=ReplyKeyboardMarkup()
+button1=KeyboardButton('Почасовая')
+button2=KeyboardButton('Фиксированная')
+choose_type_button.add(button1,button2)
