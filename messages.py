@@ -1,4 +1,6 @@
 
+
+
 start_mes = 'Приветственное сообщение'
 
 info_after_start_mes = 'Полная информация об этом боте (выберите кем вы являетесь)'
@@ -15,3 +17,6 @@ user_already_reg_mes = 'Вы уже зарегестрированы в сист
 
 you_worker_comands_mes = 'Вы работник'
 you_client_comands_mes = 'Вы заказчик'
+
+def all_vacancy_find_work_message(client,title, description,adres,workers_count, recomend_age, price):
+    return f'{client}, {title}, {description},{adres},{workers_count}, {recomend_age}, {price}'

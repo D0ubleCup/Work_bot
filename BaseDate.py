@@ -162,7 +162,6 @@ def client_change_name_bd(username, new_username):
         print (e)
         return 'Упс, что то пошло не так'
     finally: 
-        print('name')
         db.commit()
         db.close()
 #изменение номера телефона у заказчика
@@ -179,6 +178,24 @@ def client_change_phone_bd(username, new_phone_namber):
         print (e)
         return 'Упс, что то пошло не так'
     finally: 
-        print('phone')
         db.commit()
         db.close()
+
+
+
+def all_vacancy_find_work_db():
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT client, title, description, adress, workers_count, age, price FROM order_fix UNION ALL SELECT client, title, description, adress, count_workers, age, price FROM order_hour") #достаю все записи из двух столбцов
+        all_vacancy = sql.fetchall()
+        return all_vacancy
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close()
+
+all_vacancy_find_work_db()

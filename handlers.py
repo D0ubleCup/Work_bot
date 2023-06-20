@@ -9,10 +9,12 @@
 import telebot  
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes, client_endregistration_mes, info_for_client_mes, you_client_comands_mes, you_worker_comands_mes
-from markups import start_but, info_start_but, info_for_worker_but,client_but
-from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd
+from markups import start_but, info_start_but, info_for_worker_but,client_but, choise_how_to_find_work_button
+from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd,all_vacancy_find_work_db
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but
 from some_functions import phone_validator,age_validator 
+
+from messages import all_vacancy_find_work_message
 
 client_registration_dict={}
 
@@ -149,14 +151,14 @@ def send_commands_to_user(message):
 #логика профиля и его коректировки
 @bot.callback_query_handler(func=lambda call: call.data=='change_profile')
 @bot.message_handler(content_types='text')
-def worker_profile (message):
-    username = message.chat.id
-    if message.text == 'Мой профиль':
+def worker_profile (call):
+    username = call.from_user.username
+    if call.message.text == 'Мой профиль':
         role = check_role(username)
         if role == 'worker':
-            bot.send_message(message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
+            bot.send_message(call.message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
         elif role == 'client':
-            bot.send_message(message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
+            bot.send_message(call.message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
 
 
 
@@ -242,6 +244,34 @@ def client_change_phone2(message):
         mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
         bot.register_next_step_handler(mes,client_change_phone2)
 
+
+# выбор нужной команды для поиска работы работнику 
+@bot.callback_query_handler(func=lambda call: call.data=='find_work')
+def find_work(call):
+    bot.send_message(call.message.chat.id, text = 'Выберите нужную команду', reply_markup=choise_how_to_find_work_button)
+
+# показать все заявки на работу для работника
+@bot.callback_query_handler(func=lambda call: call.data=='all_vacancy_find_work')
+def all_vacancy_find_work(call):
+    all_vacancy = all_vacancy_find_work_db()
+    for one_vacancy in all_vacancy:
+        client = one_vacancy[0]
+        title = one_vacancy[1]
+        description = one_vacancy[2]
+        adres = one_vacancy[3]
+        workers_count = one_vacancy[4]
+        recomend_age = one_vacancy[5]
+        price = one_vacancy[6]
+        answer_message = all_vacancy_find_work_message(client, title, description,adres,workers_count, recomend_age, price)
+        bot.send_message(call.message.chat.id, text = answer_message)
+
+    
+
+    
+
+# фильтрация заявок для работников 
+# @bot.callback_query_handler(func=lambda call: call.data=='filter_find_work')
+# def filter_find_work(call):
 
 
 
