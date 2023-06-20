@@ -49,6 +49,12 @@ worker_profile_but.add(button1,button2,button3,button4)
 
 #def send_commands_to_user - для заказчиков
 client_but = ReplyKeyboardMarkup()
-button1 = KeyboardButton('')
+button1 = KeyboardButton('Мой профиль')
 button2 = KeyboardButton('Посмотреть заявки на работу')
 client_but.add(button1, button2)
+
+#def client_profile
+client_profile_but = InlineKeyboardMarkup()
+button1 = InlineKeyboardButton('Имя', callback_data='client_change_name')
+button2 = InlineKeyboardButton('Номер телефона', callback_data='client_change_phone')
+client_profile_but.add(button1,button2)
