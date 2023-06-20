@@ -1,0 +1,11 @@
+1. check_role(username) - проверяет кем является пользователь
+параметры: только юзернейм
+отдает - 'worker' or 'client'
+
+2. check_registration(username) -проверяет зарегистрирован ли пользователь 
+отдает: True - если зареган   False - Если не зареган 
+
+3.  phone_validator(str) - валидатор номера телефона
+отдает true или False
+4. age_validator(age): - валидатор возраста 
+отдает true или False
