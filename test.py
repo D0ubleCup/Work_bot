@@ -24,8 +24,12 @@
 # phone='89061071451'	    
 # print(norm_mob(phone))  
 
-import sqlite3
-db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
-sql=db.cursor()
+# import sqlite3
+# db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+# sql=db.cursor()
 
-sql.execute("SELECT name FROM worker WHERE username == 'Alexei0212022'")
+# sql.execute("SELECT name FROM worker WHERE username == 'Alexei0212022'")
+
+# import requests
+# responce = requests.get('https://www.lazada.com.my/#')
+# print(responce.status_code)

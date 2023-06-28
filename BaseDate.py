@@ -32,6 +32,8 @@ def check_registration(username):
     finally: 
         if db: db.close()
 
+
+
 #функция проверки роли пользователя
 def check_role(username):
     try:
@@ -44,8 +46,6 @@ def check_role(username):
     except:
         return 'Пользователь не найден'
 
-
-
 #запись работника в бд
 def reg_worker(date, username):
     db = None
@@ -57,7 +57,8 @@ def reg_worker(date, username):
     phone = worker_information['phone'].replace(' ', '_')
     age = worker_information['age']
     chat_id = worker_information['chat_id']
-
+    if resume == '/next': #обработка пропуска 
+        resume = 'Не указано'
     try: 
         db = sqlite3.connect('DataBases/workers.db')
         sql = db.cursor()
@@ -170,7 +171,6 @@ def client_change_phone_bd(username, new_phone_namber):
         db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
         sql=db.cursor()
         sql.execute(f"UPDATE client SET phone_number = '{new_phone_namber}' WHERE username = '{username}'")
-        print('phone(1)')
         db.commit()
         return f'Успешно, ваш номер успешно изменен на {new_phone_namber}'
     except sqlite3.Error as e:
@@ -198,9 +198,8 @@ def all_vacancy_find_work_db():
         db.commit()
         db.close()
 
-all_vacancy_find_work_db()
-#Добавление записи в таблицу черновая работа 
 
+#Добавление записи в таблицу черновая работа 
 def add_work_black(work_dict,username):               #функция записи заказчика в базу данных, принимает словарь и имя пользователя
     # username=client_info[username]['username']
     # chat_id=client_info[username]['chat_id']
@@ -237,4 +236,36 @@ def add_work_black(work_dict,username):               #функция запис
         db.commit()
         db.close()
 
-add_work_black({'Hzorhz': {'type': 'Почасовая', 'title': 'название', 'description': 'Описание', 'adress': 'адрес', 'workers_count': 6, 'age': 12, 'price': 1789}},'Hzorhz')
+# add_work_black({'Hzorhz': {'type': 'Почасовая', 'title': 'название', 'description': 'Описание', 'adress': 'адрес', 'workers_count': 6, 'age': 12, 'price': 1789}},'Hzorhz')
+
+def profile_worker_db(username):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT name, specialization, phone_number, age FROM worker WHERE username = '{username}'")
+        date_worker = sql.fetchone()
+        return date_worker
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close()
+
+def profile_client_db(username):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT name, phone_number FROM client WHERE username = '{username}'")
+        date_client = sql.fetchone()
+        return date_client
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close()
+
+print (profile_client_db('Alexei0212022'))

@@ -1,4 +1,4 @@
-
+from BaseDate import profile_worker_db, profile_client_db
 
 
 start_mes = 'Приветственное сообщение'
@@ -20,3 +20,17 @@ you_client_comands_mes = 'Вы заказчик'
 
 def all_vacancy_find_work_message(client,title, description,adres,workers_count, recomend_age, price):
     return f'{client}, {title}, {description},{adres},{workers_count}, {recomend_age}, {price}'
+
+def profile_worker_mes(username):
+    date_worker = profile_worker_db(username)
+    name = date_worker[0]
+    description = date_worker[1]
+    phone = date_worker[2]
+    age = date_worker[3]
+    return f'имя - {name}\nописание - {description}\nномер телефона - {phone}\nвозраст - {age}'
+
+def profile_client_mes(username):
+    date_worker = profile_client_db(username)
+    name = date_worker[0]
+    phone = date_worker[1]
+    return f'имя - {name}\nномер телефона - {phone}'

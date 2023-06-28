@@ -37,7 +37,7 @@ button1 = InlineKeyboardButton('Мой профиль', callback_data='change_pr
 button2 = InlineKeyboardButton('Посмотреть заявки на работу', callback_data='find_work')
 worker_but.add(button1, button2)
 
-#def worker_prodile
+#def worker_profile
 worker_profile_but = InlineKeyboardMarkup()
 button1 = InlineKeyboardButton('Имя', callback_data='worker_change_name')
 button2 = InlineKeyboardButton('Специализацию', callback_data='worker_change_description')

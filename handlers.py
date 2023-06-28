@@ -13,6 +13,7 @@ from markups import start_but, info_start_but, info_for_worker_but,client_but,ch
 from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but
 from some_functions import phone_validator,age_validator 
+from messages import profile_worker_mes, profile_client_mes
 
 from messages import all_vacancy_find_work_message
 
@@ -55,10 +56,10 @@ def worker_reg_resume(message):
     username=message.from_user.username
     first_name = message.text
     worker_registration_dict[username]['first_name'] = first_name
-    mes = bot.send_message(message.chat.id , 'Напишите на чем вы специализируетесь или пару слов о себе')
+    mes = bot.send_message(message.chat.id , 'Напишите на чем вы специализируетесь или пару слов о себе, что бы пропустить нажмите /next')
     bot.register_next_step_handler(mes, worker_reg_phone)
 
-def worker_reg_phone(message): 
+def worker_reg_phone(message):
     username=message.from_user.username 
     resume = message.text
     worker_registration_dict[username]['resume'] = resume
@@ -100,7 +101,7 @@ def client_reg_info(call):
     bot.send_message(call.message.chat.id, text=info_for_client_mes, reply_markup=info_for_client_but)
 
 @bot.callback_query_handler(func=lambda call: call.data=='client_registration')
-def client_reg_name(call):
+def client_reg(call):
     username=call.from_user.username
     chat_id=call.message.chat.id
     client_registration_dict[username]={
@@ -114,21 +115,26 @@ def client_reg_surname(message):
     username=message.from_user.username
     name=message.text
     client_registration_dict[username]['name']=name
-    mes = bot.send_message(message.chat.id , 'Введите ваш номер телефона')
+    mes = bot.send_message(message.chat.id , 'Введите ваш номер телефона, что бы пропустить нажмите /next')
     bot.register_next_step_handler(mes,client_reg_phone)
 
 def client_reg_phone(message):
     username=message.from_user.username
-    phone_number=message.text.strip()
-    check_phone=phone_validator(phone_number)
-    if check_phone:
-        client_registration_dict[username]['phone_number']=phone_number
-        reg_client(client_registration_dict, username)
-        bot.send_message(message.chat.id, text = client_endregistration_mes)
-        del client_registration_dict[username]
+    if message.text == '/next':
+        client_registration_dict[username]['phone_number']= 'Не указано'
     else:
-        mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
-        bot.register_next_step_handler(mes,client_reg_phone)
+        phone_number=message.text.strip()
+        check_phone=phone_validator(phone_number)
+        if check_phone:
+            client_registration_dict[username]['phone_number']=phone_number
+            
+        else:
+            mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
+            bot.register_next_step_handler(mes,client_reg_phone)
+
+    reg_client(client_registration_dict, username)
+    bot.send_message(message.chat.id, text = client_endregistration_mes)
+    del client_registration_dict[username]
     
 
 
@@ -150,99 +156,116 @@ def send_commands_to_user(message):
 #возможно логику пересылку на именно этот хендлеры нужно заменить
 #логика профиля и его коректировки
 @bot.callback_query_handler(func=lambda call: call.data=='change_profile')
-@bot.message_handler(content_types='text')
-def worker_profile (message):
-    username = message.chat.id
-    if message.text == 'Мой профиль':
-        role = check_role(username)
-        if role == 'worker':
-            bot.send_message(message.chat.id, text = 'функция(работник)', reply_markup=worker_profile_but)
-        elif role == 'client':
-            bot.send_message(message.chat.id, text = 'функция(клиент)', reply_markup=client_profile_but)
+def user_profile (call):
+    username = call.from_user.username
+    role = check_role(username)
+    if role == 'worker':
+        bot.send_message(call.message.chat.id, text = profile_worker_mes(username), reply_markup=worker_profile_but)
+    elif role == 'client':
+        bot.send_message(call.message.chat.id, text = profile_client_mes(username), reply_markup=client_profile_but)
+
 
 
 
 #изменение имени у работника
 @bot.callback_query_handler(func=lambda call: call.data=='worker_change_name')
 def worker_change_name(call):
-    mes = bot.send_message(call.message.chat.id, 'Введите новое имя пользователя')
+    mes = bot.send_message(call.message.chat.id, 'Введите новое имя пользователя, что бы отменить, нажмите /skip')
     bot.register_next_step_handler(mes, worker_change_name2)
 def worker_change_name2(message):
-    username = message.from_user.username
-    new_username = message.text
-    answer_bd = worker_change_name_bd(username, new_username)
-    bot.send_message(message.chat.id , text = answer_bd, reply_markup=worker_but)
+    if message.text == '/skip':
+        bot.send_message(message.chat.id , text = 'функция(работник)', reply_markup=worker_but)
+    else:
+        username = message.from_user.username
+        new_username = message.text
+        answer_bd = worker_change_name_bd(username, new_username)
+        bot.send_message(message.chat.id , text = answer_bd, reply_markup=worker_but)
 
 #изменение описания у работника 
 @bot.callback_query_handler(func=lambda call: call.data=='worker_change_description')
 def worker_change_description(call):
-    mes = bot.send_message(call.message.chat.id, 'Введите новое описание')
+    mes = bot.send_message(call.message.chat.id, 'Введите новое описание, что бы отменить, нажмите /skip')
     bot.register_next_step_handler(mes, worker_change_description2)
 def worker_change_description2(message):
-    username = message.from_user.username
-    new_description = message.text
-    answer_bd = worker_change_description_bd(username, new_description)
-    bot.send_message(message.chat.id , text = answer_bd, reply_markup= worker_but)
+    if message.text == '/skip':
+        bot.send_message(message.chat.id , text = 'функция(работник)', reply_markup=worker_but)
+    else:
+        username = message.from_user.username
+        new_description = message.text
+        answer_bd = worker_change_description_bd(username, new_description)
+        bot.send_message(message.chat.id , text = answer_bd, reply_markup= worker_but)
     
 #изменение номера телефона у работника 
 @bot.callback_query_handler(func=lambda call: call.data=='worker_change_phone')
 def worker_change_phone(call):
-    mes = bot.send_message(call.message.chat.id, 'Введите новый телефонный номер')
+    mes = bot.send_message(call.message.chat.id, 'Введите новый телефонный номер, что бы отменить, нажмите /skip')
     bot.register_next_step_handler(mes, worker_change_phone2)
 def worker_change_phone2(message):
-    username = message.from_user.username
-    new_phone_namber = message.text
-    check_phone=phone_validator(new_phone_namber)
-    if check_phone:
-        answer_bd = worker_change_phone_bd(username, new_phone_namber)
-        bot.send_message(message.chat.id , text = answer_bd, reply_markup=worker_but)
+    if message.text == '/skip':
+        bot.send_message(message.chat.id , text = 'функция(работник)', reply_markup=worker_but)
     else:
-        mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
-        bot.register_next_step_handler(mes,worker_change_phone2)
+        username = message.from_user.username
+        new_phone_namber = message.text
+        check_phone=phone_validator(new_phone_namber)
+        if check_phone:
+            answer_bd = worker_change_phone_bd(username, new_phone_namber)
+            bot.send_message(message.chat.id , text = answer_bd, reply_markup=worker_but)
+        else:
+            mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
+            bot.register_next_step_handler(mes,worker_change_phone2)
         
 #изменение возраста у работника 
 @bot.callback_query_handler(func=lambda call: call.data=='worker_change_age')
 def worker_change_age(call):
-    mes = bot.send_message(call.message.chat.id, 'Введите другой возраст')
+    mes = bot.send_message(call.message.chat.id, 'Введите другой возраст, что бы отменить, нажмите /skip')
     bot.register_next_step_handler(mes, worker_change_age2)
 def worker_change_age2(message):
-    username = message.from_user.username
-    new_age = message.text
-    check_age = age_validator (new_age)
-    if check_age:
-        answer_bd = worker_change_age_bd(username, new_age)
-        bot.send_message(message.chat.id , text = answer_bd,reply_markup=worker_but)
+    if message.text == '/skip':
+        bot.send_message(message.chat.id , text = 'функция(работник)', reply_markup=worker_but)
     else:
-        mes = bot.send_message(message.chat.id , text = 'Возраст некорректен, введите корректный возраст')
-        bot.register_next_step_handler(mes, worker_change_age2)
+        username = message.from_user.username
+        new_age = message.text
+        check_age = age_validator (new_age)
+        if check_age:
+            answer_bd = worker_change_age_bd(username, new_age)
+            bot.send_message(message.chat.id , text = answer_bd,reply_markup=worker_but)
+        else:
+            mes = bot.send_message(message.chat.id , text = 'Возраст некорректен, введите корректный возраст')
+            bot.register_next_step_handler(mes, worker_change_age2)
 
 
 # изменения профиля у заказчиков
 @bot.callback_query_handler(func=lambda call: call.data=='client_change_name')
 def client_change_name(call):
-    mes = bot.send_message(call.message.chat.id, 'Введите новое имя пользователя')
+    mes = bot.send_message(call.message.chat.id, 'Введите новое имя пользователя, что бы отменить, нажмите /skip')
     bot.register_next_step_handler(mes, client_change_name2)
 def client_change_name2(message):
-    username = message.from_user.username
-    new_username = message.text
-    answer_bd = client_change_name_bd(username, new_username)
-    bot.send_message(message.chat.id , text = answer_bd, reply_markup=client_but)
+    if message.text == '/skip':
+        bot.send_message(message.chat.id , text = 'функция(работник)', reply_markup=client_but)
+    else:
+        username = message.from_user.username
+        new_username = message.text
+        answer_bd = client_change_name_bd(username, new_username)
+        bot.send_message(message.chat.id , text = answer_bd, reply_markup=client_but)
 
 #изменение номера телефона у клиента 
 @bot.callback_query_handler(func=lambda call: call.data=='client_change_phone')
 def client_change_phone(call):
-    mes = bot.send_message(call.message.chat.id, 'Введите новый телефонный номер')
+    mes = bot.send_message(call.message.chat.id, 'Введите новый телефонный номер, что бы отменить, нажмите /skip')
     bot.register_next_step_handler(mes, client_change_phone2)
 def client_change_phone2(message):
-    username = message.from_user.username
-    new_phone_namber = message.text
-    check_phone=phone_validator(new_phone_namber)
-    if check_phone:
-        answer_bd = client_change_phone_bd(username, new_phone_namber)
-        bot.send_message(message.chat.id , text = answer_bd, reply_markup=client_but)
+    if message.text == '/skip':
+        bot.send_message(message.chat.id , text = 'функция(работник)', reply_markup=client_but)
     else:
-        mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
-        bot.register_next_step_handler(mes,client_change_phone2)
+        username = message.from_user.username
+        new_phone_namber = message.text
+        check_phone=phone_validator(new_phone_namber)
+        if check_phone:
+            answer_bd = client_change_phone_bd(username, new_phone_namber)
+            bot.send_message(message.chat.id , text = answer_bd, reply_markup=client_but)
+        else:
+            mes=bot.send_message(message.chat.id,'Введите корректный номер телефона')
+            bot.register_next_step_handler(mes,client_change_phone2)
 
 
 # выбор нужной команды для поиска работы работнику 
@@ -270,8 +293,10 @@ def all_vacancy_find_work(call):
     
 
 # фильтрация заявок для работников 
-# @bot.callback_query_handler(func=lambda call: call.data=='filter_find_work')
-# def filter_find_work(call):
+@bot.callback_query_handler(func=lambda call: call.data=='filter_find_work')
+def filter_find_work(call):
+    filter_find_work_dict = {}
+    mes = bot.send_message(call.message.chat.id, 'Укажите желаемую цену через тире в формате 1000-2500')
 
 
 #Добавление работы в черновую базу данных со стороны заказчика

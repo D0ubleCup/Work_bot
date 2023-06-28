@@ -10,6 +10,10 @@ from DataBases:
 
 4. reg_worker(date, username) - регистрация работника 
 
+5. profile_worker_db(username) - данные о работнике, выдает кортеджем
+
+6. profile_client_db(username) - данные о клиенте, выдает кортеджем
+
 from some_functions:
 1.  phone_validator(str) - валидатор номера телефона
 отдает true или False
