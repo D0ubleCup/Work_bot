@@ -7,15 +7,17 @@
 """
 
 import telebot  
+from telebot.types import InlineKeyboardButton,InlineKeyboardMarkup
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes, client_endregistration_mes, info_for_client_mes, you_client_comands_mes, you_worker_comands_mes
 from markups import start_but, info_start_but, info_for_worker_but,client_but,choose_type_button, choise_how_to_find_work_button
-from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db
+from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db,select_admin_chat_id,accept_work_db,reject_work_db
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but
 from some_functions import phone_validator,age_validator 
-from messages import profile_worker_mes, profile_client_mes
+from messages import profile_worker_mes, profile_client_mes,all_vacancy_find_work_message
 
-from messages import all_vacancy_find_work_message
+
+
 
 client_registration_dict={}
 client_add_work_dict={}
@@ -308,12 +310,13 @@ def choose_type_work(call):
 
 def work_title(message):
     username=message.from_user.username
-    if message.text=='Почасовая':
-        client_add_work_dict[username]['type']='Почасовая'
-    if message.text=='Фиксированная':
-        client_add_work_dict[username]['type']='Фиксированная'
-    mes=bot.send_message(message.chat.id,'Введите название работы')
-    bot.register_next_step_handler(mes,work_description)
+    if message.text=='Почасовая' or message.text=='Фиксированная':
+        client_add_work_dict[username]['type']=message.text
+        mes=bot.send_message(message.chat.id,'Введите название работы')
+        bot.register_next_step_handler(mes,work_description)
+    else:
+        mes=bot.send_message(message.chat.id,'Пожалуйста, воспользуйтесь клавиатурой',reply_markup=choose_type_button)
+        bot.register_next_step_handler(mes,work_title)
 
 def work_description(message):
     username=message.from_user.username
@@ -361,12 +364,37 @@ def work_finish(message):
         username=message.from_user.username
         client_add_work_dict[username]['price']=int(message.text.strip())
         mes=bot.send_message(message.chat.id,'Ваша вакансия отправлена администатору. В скором времени она будет опубликована и на нее начнут откликаться работники.')
-        add_work_black(client_add_work_dict,username)
-        print(client_add_work_dict)
+        last_id=add_work_black(client_add_work_dict,username)
+        admin_chat_id=select_admin_chat_id()
+        print(last_id)
+        title=client_add_work_dict[username]['title']
+        description=client_add_work_dict[username]['description']
+        type=client_add_work_dict[username]['type']
+        adres=client_add_work_dict[username]['adress']
+        workers_count=client_add_work_dict[username]['workers_count']
+        age=client_add_work_dict[username]['age']
+        price=client_add_work_dict[username]['price']
+        keyboard=InlineKeyboardMarkup()
+        button_agree=InlineKeyboardButton('Одобрить',callback_data=f'work_accept_id={last_id}')
+        button_reject=InlineKeyboardButton('Отклонить',callback_data=f'work_reject_id={last_id}')
+        keyboard.add(button_agree)
+        keyboard.add(button_reject)
+        bot.send_message(admin_chat_id,f'Название : {title}\nОписание : {description}\nТип оплаты : {type}\nАдрес : {adres}\nКоличество работников : {workers_count}\nЖелаемый возраст:{age}\nОплата : {price}',reply_markup=keyboard)
     else:
         mes=bot.send_message(message.chat.id,'Пожалуйста, введите число.')
         bot.register_next_step_handler(mes,work_finish)
     
-    
 
+@bot.callback_query_handler(func=lambda call: 'work_accept' in call.data)
+def accept_work(call):
+    order_id=int(call.data.split('=')[1])
+    client_chat_id=accept_work_db(order_id)
+    bot.send_message(client_chat_id,'Ваша заявка опубликована')
+
+
+@bot.callback_query_handler(func=lambda call: 'work_reject' in call.data)
+def accept_work(call):
+    order_id=int(call.data.split('=')[1])
+    client_chat_id=reject_work_db(order_id)
+    bot.send_message(client_chat_id,'Ваша заявка отклонена')
 bot.polling(none_stop=True) 

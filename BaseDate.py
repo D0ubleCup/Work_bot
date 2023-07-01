@@ -219,16 +219,15 @@ def add_work_black(work_dict,username):               #функция запис
     try:
         db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
         sql=db.cursor()
-        sql.execute(f"SELECT * FROM client WHERE username=='{username}'")
+        sql.execute(f"SELECT id FROM client WHERE username=='{username}'")
         client=sql.fetchone()[0]
-        if type_work=='Почасовая':
-            sql.execute(f"INSERT INTO order_hour_black(client,title,description,adress,count_workers,age,price) VALUES('{client}','{title}','{description}','{adress}','{count_workers}','{age}','{price}')")
-            sql.execute(f"UPDATE main_info SET orders_count = orders_count + 1")
-            sql.execute(f"UPDATE main_info SET orders_sum = orders_sum + {price}")
-        if type_work=='Фиксированная':
-            sql.execute(f"INSERT INTO order_fix_black(client,title,description,adress,count_workers,age,price) VALUES('{client}','{title}','{description}','{adress}','{count_workers}','{age}','{price}')")
-            sql.execute(f"UPDATE main_info SET orders_count = orders_count + 1")
-            sql.execute(f"UPDATE main_info SET orders_sum = orders_sum + {price}")
+        print(client)
+        
+        sql.execute(f"INSERT INTO 'order' (client,title,description,adress,workers_count,age,price,type,status) VALUES('{client}','{title}','{description}','{adress}',{count_workers},'{age}','{price}','{type_work}',0)")
+        sql.execute(f"UPDATE main_info SET orders_count = orders_count + 1")
+        sql.execute(f"UPDATE main_info SET orders_sum = orders_sum + {price}")
+        last_id = sql.execute('SELECT last_insert_rowid()').fetchone()[0]
+        return last_id
     except sqlite3.Error as e: 
         if db: db.rollback()  
         print (e) 
@@ -266,6 +265,62 @@ def profile_client_db(username):
         return 'Упс, что то пошло не так'
     finally: 
         db.commit()
-        db.close()
+        db.close() 
 
-print (profile_client_db('Alexei0212022'))
+
+
+#Функция, которая возвращает чат айди админа
+
+def select_admin_chat_id():
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT chat_id FROM admin")
+        admin_chat_id = sql.fetchone()[0]
+
+        return admin_chat_id
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close() 
+#Функция одобрения работы и перевода ее в активное состояние. Также возвращает чат айди клиента, чтобы отправить ему сообщение о том, что заявка опубликована
+def accept_work_db(order_id):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"UPDATE 'order' SET status = 1 WHERE id = {order_id}")
+        client_id=sql.execute(f"SELECT client FROM 'order' WHERE id = {order_id}").fetchone()[0]
+        
+        chat_id=sql.execute(f"SELECT chat_id FROM 'client' WHERE id = {client_id}").fetchone()[0]      
+                 
+        return chat_id
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close() 
+
+#Функция удаления работы из бд, если админ отклонил ее
+def reject_work_db(order_id):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        
+        client_id=sql.execute(f"SELECT client FROM 'order' WHERE id = {order_id}").fetchone()[0]
+        
+        chat_id=sql.execute(f"SELECT chat_id FROM 'client' WHERE id = {client_id}").fetchone()[0]      
+        
+        sql.execute(f"DELETE FROM 'order' WHERE id ={order_id}")         
+        return chat_id
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close() 
