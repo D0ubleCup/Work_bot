@@ -7,13 +7,14 @@
 """
 
 import telebot  
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes, client_endregistration_mes, info_for_client_mes, you_client_comands_mes, you_worker_comands_mes
 from markups import start_but, info_start_but, info_for_worker_but,client_but,choose_type_button, choise_how_to_find_work_button
-from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db
+from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db, find_chatid_client_for_worker_db    
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but
 from some_functions import phone_validator,age_validator 
-from messages import profile_worker_mes, profile_client_mes
+from messages import profile_worker_mes, profile_client_mes, responce_worker_for_client_message
 
 from messages import all_vacancy_find_work_message
 
@@ -277,26 +278,49 @@ def find_work(call):
 @bot.callback_query_handler(func=lambda call: call.data=='all_vacancy_find_work')
 def all_vacancy_find_work(call):
     all_vacancy = all_vacancy_find_work_db()
+    username = call.from_user.username
     for one_vacancy in all_vacancy:
-        client = one_vacancy[0]
-        title = one_vacancy[1]
-        description = one_vacancy[2]
-        adres = one_vacancy[3]
-        workers_count = one_vacancy[4]
-        recomend_age = one_vacancy[5]
-        price = one_vacancy[6]
+        id_vacancy = one_vacancy[0]
+        client = one_vacancy[1]
+        title = one_vacancy[2]
+        description = one_vacancy[3]
+        adres = one_vacancy[4]
+        workers_count = one_vacancy[5]
+        recomend_age = one_vacancy[6]
+        price = one_vacancy[7]
         answer_message = all_vacancy_find_work_message(client, title, description,adres,workers_count, recomend_age, price)
-        bot.send_message(call.message.chat.id, text = answer_message)
 
-    
+        worker_responce_work_but = InlineKeyboardMarkup()
+        button = InlineKeyboardButton('Откликнуться',callback_data=f'responce_worker_id id_vacancy={id_vacancy}, id_username_worker={username}')
+        worker_responce_work_but.add(button)
 
-    
+        bot.send_message(call.message.chat.id, text = answer_message, reply_markup= worker_responce_work_but)
+
+@bot.callback_query_handler(func=lambda call: 'responce_worker' in call.data)
+def responce_worker_for_client(call): 
+    call_data = call.data
+    id_order = call_data.split('=')[1]
+    username_worker = call_data[2]
+    chatid_client = find_chatid_client_for_worker_db(id_order)
+    text_for_client = responce_worker_for_client_message(username_worker)
+
+
+
+    bot.send_message(chat_id= chatid_client, text = text_for_client)
 
 # фильтрация заявок для работников 
-@bot.callback_query_handler(func=lambda call: call.data=='filter_find_work')
-def filter_find_work(call):
-    filter_find_work_dict = {}
-    mes = bot.send_message(call.message.chat.id, 'Укажите желаемую цену через тире в формате 1000-2500')
+# filter_find_work_dict = {}
+# @bot.callback_query_handler(func=lambda call: call.data=='filter_find_work')
+# def filter_find_work(call):
+#     username = call.from_user.username
+#     filter_find_work_dict[username] = {}
+#     mes = bot.send_message(call.message.chat.id, 'Укажите минимальную цену')
+#     bot.register_next_step_handler(mes, end_filter_worker)
+
+# def end_filter_worker(message):
+    
+
+
 
 
 #Добавление работы в черновую базу данных со стороны заказчика

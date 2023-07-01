@@ -33,3 +33,6 @@
 # import requests
 # responce = requests.get('https://www.lazada.com.my/#')
 # print(responce.status_code)
+
+x = '1000-1500'
+print(x.split('-'))

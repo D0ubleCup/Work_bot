@@ -34,3 +34,11 @@ def profile_client_mes(username):
     name = date_worker[0]
     phone = date_worker[1]
     return f'имя - {name}\nномер телефона - {phone}'
+
+def responce_worker_for_client_message(username):
+    date_worker = profile_worker_db(username)
+    name = date_worker[0]
+    description = date_worker[1]
+    phone = date_worker[2]
+    age = date_worker[3]
+    return f'На вашу работу откликнулись \nимя:{name} \nо себе:{description} \nномер телефона:{phone}  \nвозраст:{age}'

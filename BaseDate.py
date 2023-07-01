@@ -187,7 +187,7 @@ def all_vacancy_find_work_db():
     try: 
         db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
         sql=db.cursor()
-        sql.execute(f"SELECT client, title, description, adress, workers_count, age, price FROM order_fix UNION ALL SELECT client, title, description, adress, count_workers, age, price FROM order_hour") #достаю все записи из двух столбцов
+        sql.execute(f"SELECT id, client, title, description, adress, workers_count, age, price FROM 'order' WHERE status = '1'") #достаю все записи из двух столбцов
         all_vacancy = sql.fetchall()
         return all_vacancy
     except sqlite3.Error as e:
@@ -268,4 +268,23 @@ def profile_client_db(username):
         db.commit()
         db.close()
 
-print (profile_client_db('Alexei0212022'))
+# print (profile_client_db('Alexei0212022'))
+
+#достает chatid заказчика для пересылки ему отклика работника 
+def find_chatid_client_for_worker_db(id_order):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT client FROM 'order' WHERE id = '{id_order}'")
+        client_id = sql.fetchone()[0]
+        sql.execute(f'SELECT chat_id FROM client WHERE id = {client_id}')
+        chatid_client = sql.fetchone()[0]
+        return chatid_client
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close()
+
