@@ -36,3 +36,7 @@
 
 x = '1000-1500'
 print(x.split('-'))
+
+# @bot.callback_query_handler(func=lambda call: 'work_agree' in call.data)
+
+# def welcoe(message):
