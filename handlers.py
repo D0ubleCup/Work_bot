@@ -378,12 +378,16 @@ def work_description(message):
 def work_adress(message):
     username=message.from_user.username
     client_add_work_dict[username]['description']=message.text
-    mes=bot.send_message(message.chat.id,'Введите адрес работы')
+    mes=bot.send_message(message.chat.id,'Введите адрес работы. Если хотите пропустить, то введите /skip')
     bot.register_next_step_handler(mes,work_workers_count)
 
 def work_workers_count(message):
     username=message.from_user.username
-    client_add_work_dict[username]['adress']=message.text
+    if message.text.strip()=='/skip':
+    
+        client_add_work_dict[username]['adress']='Не указано'
+    else:
+        client_add_work_dict[username]['adress']=message.text
     mes=bot.send_message(message.chat.id,'Введите необходимое количество работников')
     bot.register_next_step_handler(mes,work_age)
 
@@ -391,7 +395,7 @@ def work_age(message):
     if message.text.strip().isnumeric():
         username=message.from_user.username
         client_add_work_dict[username]['workers_count']=int(message.text.strip())
-        mes=bot.send_message(message.chat.id,'Введите желаемый возраст работников')
+        mes=bot.send_message(message.chat.id,'Введите желаемый возраст работников. Если хотите пропустить, то введите /skip')
         bot.register_next_step_handler(mes,work_price)
     #     bot.register_next_step_handler(mes,work_price)
     #     mes=bot.send_message(message.chat.id,'Введите желаемую оплату в рублях. Если она не соответсвует нормам, то с вами свяжется администратор для того, чтобы обсудить ее')
@@ -400,14 +404,18 @@ def work_age(message):
         mes=bot.send_message(message.chat.id,'Пожалуйста, введите число.')
         bot.register_next_step_handler(mes,work_age)
 def work_price(message):
-    if message.text.strip().isnumeric():
-        username=message.from_user.username
-        client_add_work_dict[username]['age']=int(message.text.strip())
-        mes=bot.send_message(message.chat.id,'Введите желаемую оплату в рублях. Если она не соответсвует нормам, то с вами свяжется администратор для того, чтобы обсудить ее')
-        bot.register_next_step_handler(mes,work_finish)   
+    username=message.from_user.username
+    if message.text.strip()=='/skip':
+        client_add_work_dict[username]['age']='Не указано'
     else:
-        mes=bot.send_message(message.chat.id,'Пожалуйста, введите число.')
-        bot.register_next_step_handler(mes,work_price)
+        if message.text.strip().isnumeric():
+            username=message.from_user.username
+            client_add_work_dict[username]['age']=int(message.text.strip())
+            mes=bot.send_message(message.chat.id,'Введите желаемую оплату в рублях. Если она не соответсвует нормам, то с вами свяжется администратор для того, чтобы обсудить ее')
+            bot.register_next_step_handler(mes,work_finish)   
+        else:
+            mes=bot.send_message(message.chat.id,'Пожалуйста, введите число.')
+            bot.register_next_step_handler(mes,work_price)
    
 
 def work_finish(message):
