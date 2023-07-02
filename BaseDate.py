@@ -351,3 +351,36 @@ def reject_work_db(order_id):
     finally: 
         db.commit()
         db.close() 
+
+
+def select_worker_chat_id(username):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT chat_id FROM worker WHERE username = '{username}'")
+        worker_chatid = sql.fetchone()[0]
+        return worker_chatid
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close() 
+
+def full_info_order(order_id):
+    try: 
+        db=sqlite3.connect('DataBases/workers.db',check_same_thread=False)
+        sql=db.cursor()
+        sql.execute(f"SELECT * FROM 'order' WHERE id = {order_id}")
+        order_info = sql.fetchone()
+        return order_info
+    except sqlite3.Error as e:
+        db.rollback() 
+        print (e)
+        return 'Упс, что то пошло не так'
+    finally: 
+        db.commit()
+        db.close() 
+
+print(full_info_order(1))

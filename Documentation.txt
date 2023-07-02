@@ -14,6 +14,10 @@ from DataBases:
 
 6. profile_client_db(username) - данные о клиенте, выдает кортеджем
 
+7. select_worker_chat_id(username) - выдает чат id работника
+
+8. def full_info_order(order_id) - выдает всю информацию о конкретном заказе
+
 from some_functions:
 1.  phone_validator(str) - валидатор номера телефона
 отдает true или False

@@ -1,4 +1,4 @@
-from BaseDate import profile_worker_db, profile_client_db
+from BaseDate import profile_worker_db, profile_client_db, full_info_order
 
 
 start_mes = 'Приветственное сообщение'
@@ -44,4 +44,12 @@ def responce_worker_for_client_message(username):
     age = date_worker[3]
     return f'На вашу работу откликнулись \nимя:{name} \nо себе:{description} \nномер телефона:{phone}  \nвозраст:{age}'
 
-# print (responce_worker_for_client_message('Alexei0212022'))
+def accept_worker_order_message(id_order):
+    order_list = full_info_order(id_order)
+    title = order_list[2]
+    description = order_list[3]
+    adres = order_list[4]
+    age = order_list[6]
+    price = order_list[7]
+    return f'Вам пришел отклилк с заказа, вы назначенны работником \nназвание-{title} \nописание-{description} \nадрес-{adres} \nвозраст-{age} \nцена-{price}'
+

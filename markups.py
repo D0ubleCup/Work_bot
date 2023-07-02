@@ -70,3 +70,7 @@ choose_type_button=ReplyKeyboardMarkup()
 button1=KeyboardButton('Почасовая')
 button2=KeyboardButton('Фиксированная')
 choose_type_button.add(button1,button2)
+
+
+
+

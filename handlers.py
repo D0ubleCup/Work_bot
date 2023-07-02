@@ -11,7 +11,7 @@ from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 from config import TOKEN 
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes, client_endregistration_mes, info_for_client_mes, you_client_comands_mes, you_worker_comands_mes
 from markups import start_but, info_start_but, info_for_worker_but,client_but,choose_type_button, choise_how_to_find_work_button
-from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db, find_chatid_client_for_worker_db    
+from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db, find_chatid_client_for_worker_db
 from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but
 from some_functions import phone_validator,age_validator 
 from messages import profile_worker_mes, profile_client_mes, responce_worker_for_client_message
@@ -20,9 +20,9 @@ from config import TOKEN
 from messages import start_mes, info_after_start_mes, info_for_worker_mes, worker_endregistration_mes, user_already_reg_mes, client_endregistration_mes, info_for_client_mes, you_client_comands_mes, you_worker_comands_mes
 from markups import start_but, info_start_but, info_for_worker_but,client_but,choose_type_button, choise_how_to_find_work_button
 from BaseDate import check_registration,reg_client,check_role,reg_worker, worker_change_name_bd, worker_change_description_bd,worker_change_phone_bd,worker_change_age_bd,client_change_name_bd,client_change_phone_bd, add_work_black,all_vacancy_find_work_db,select_admin_chat_id,accept_work_db,reject_work_db
-from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but
+from markups import start_but, info_start_but, info_for_worker_but,info_for_client_but,worker_but, worker_profile_but,client_profile_but, select_worker_chat_id
 from some_functions import phone_validator,age_validator 
-from messages import profile_worker_mes, profile_client_mes,all_vacancy_find_work_message
+from messages import profile_worker_mes, profile_client_mes,all_vacancy_find_work_message, accept_worker_order_message
 
 
 
@@ -314,9 +314,28 @@ def responce_worker_for_client(call):
     chatid_client = find_chatid_client_for_worker_db(id_order)
     text_for_client = responce_worker_for_client_message(username_worker)
 
+    responce_client_for_worker_button = InlineKeyboardMarkup()
+    button1 = InlineKeyboardButton('Принять работника', callback_data= f'accept_worker username={username_worker}={id_order}')
+    button2 = InlineKeyboardButton('Отклонить предложение', callback_data='reject_worker')
+    responce_client_for_worker_button.add(button1, button2)
+
+    bot.send_message(chat_id=chatid_client, text = text_for_client, reply_markup=responce_client_for_worker_button)
+
+@bot.callback_query_handler(func=lambda call: 'accept_worker' in call.data)
+def accept_worker(call):
+    call_data = call.data
+    call_data_spl = call_data.split('=')
+    id_order = call_data_spl[2]
+    username_worker = call_data_spl[1]
+    chatid_worker = select_worker_chat_id(username_worker)
+    text_accept = accept_worker_order_message(id_order)
+    bot.send_message(chat_id= chatid_worker, text = text_accept)
+
+#id работника , заказ
+
+#@bot.callback_query_handler(func=lambda call: call.data=='reject_worker')
 
 
-    bot.send_message(chat_id= chatid_client, text = text_for_client)
 
 # фильтрация заявок для работников 
 # filter_find_work_dict = {}
@@ -429,4 +448,10 @@ def accept_work(call):
     order_id=int(call.data.split('=')[1])
     client_chat_id=reject_work_db(order_id)
     bot.send_message(client_chat_id,'Ваша заявка отклонена')
+
+
+
+
+
+
 bot.polling(none_stop=True) 
